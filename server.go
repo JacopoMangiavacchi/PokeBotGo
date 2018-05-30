@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net"
-	pb "pokemon/pokemon"
+
+	pb "github.com/JacopoMangiavacchi/PokeBotGo/pokemon"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
