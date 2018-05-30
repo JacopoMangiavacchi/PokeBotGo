@@ -15,6 +15,16 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
+type pokemon struct {
+	Id     int32  `json:"id"`
+	Name   string `json:"name"`
+	Height int32  `json:"height"`
+	Weight int32  `json:"weight"`
+}
+
+type types struct {
+}
+
 const (
 	port = ":50051"
 )
@@ -30,8 +40,18 @@ func (s *server) SearchPokemon(input *pb.PokeInput, stream pb.PokeBot_SearchPoke
 
 	if error == nil {
 		stream.Send(&p)
-	} else {
+	} else if error.Error() == "notFound" {
+		pokemons := make(chan pb.Pokemon)
+		go getTypes(input.Name, pokemons)
 
+		for {
+			p, more := <-pokemons
+			if more {
+				stream.Send(&p)
+			} else {
+				break
+			}
+		}
 	}
 
 	return nil
@@ -49,13 +69,6 @@ func main() {
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
-}
-
-type pokemon struct {
-	Id     int32  `json:"id"`
-	Name   string `json:"name"`
-	Height int32  `json:"height"`
-	Weight int32  `json:"weight"`
 }
 
 func getPokemon(name string) (pb.Pokemon, error) {
@@ -82,11 +95,15 @@ func getPokemon(name string) (pb.Pokemon, error) {
 		return p, errors.New("wrongBody")
 	}
 
-	pokemon1 := pokemon{}
+	pokemon1 := pokemon{-1, "", -1, -1}
 	jsonErr := json.Unmarshal(body, &pokemon1)
 	if jsonErr != nil {
 		log.Fatal(jsonErr)
 		return p, errors.New("jsonUnmarshal")
+	}
+
+	if pokemon1.Id == -1 {
+		return p, errors.New("notFound")
 	}
 
 	p.Name = pokemon1.Name
@@ -128,4 +145,23 @@ func getPokemon(name string) (pb.Pokemon, error) {
 
 	return p, nil
 	//return p, errors.New("notFound")
+}
+
+func getTypes(name string, pokemons chan pb.Pokemon) {
+	//TODO: Call https://pokeapi.co/api/v2/type/... API
+
+	//TODO: For each Pokemon call getPokemon()
+
+	//TODO: send to channel the pokemon
+
+	var p pb.Pokemon
+	p.Name = "type1"
+
+	pokemons <- p
+
+	p.Name = "type2"
+
+	pokemons <- p
+
+	close(pokemons)
 }
