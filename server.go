@@ -61,7 +61,8 @@ type pokemon struct {
 func getPokemon(name string) (pb.Pokemon, error) {
 	var p pb.Pokemon
 
-	req, err := http.NewRequest("GET", "https://pokeapi.co/api/v2/pokemon/bulbasaur", nil)
+	url := fmt.Sprintf("https://pokeapi.co/api/v2/pokemon/%s", name)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return p, errors.New("wrongUrl")
 	}
@@ -92,6 +93,38 @@ func getPokemon(name string) (pb.Pokemon, error) {
 	p.Id = pokemon1.Id
 	p.Height = pokemon1.Height
 	p.Weight = pokemon1.Weight
+	p.Thumbnail = fmt.Sprintf("https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/%d.png", pokemon1.Id)
+	p.Image = fmt.Sprintf("https://img.pokemondb.net/artwork/%s.jpg", name)
+
+	//TODO: Get types
+	// var types = [];
+	// pokemon.types.forEach(element => {
+	//     types.push(element.type.name);
+	// });
+
+	//TODO: Get species
+	// var species = pokemon.species.name;
+
+	//TODO: Call species API  https://pokeapi.co/api/v2/pokemon-species/...
+
+	//TODO: Get hatitats and flavorText
+	// var habitatats = ""
+	// var flavorText = "";
+
+	// if(pokemonSpecies != null) {
+	//   if(pokemonSpecies.habitat != null) {
+	//     habitatats = pokemonSpecies.habitat.name;
+	//   }
+
+	//   var flavors = pokemonSpecies.flavor_text_entries;
+
+	//   flavors.forEach(element => {
+	//       if(element.language.name === "en") {
+	//           flavorText = element.flavor_text.replace(/(?:\r\n|\r|\n|\f)/g, ' ');
+	//       }
+	//   });
+
+	//   pokemon.flavorText = flavorText;
 
 	return p, nil
 	//return p, errors.New("notFound")
